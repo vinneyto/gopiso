@@ -1,0 +1,30 @@
+meta {
+  name: get room by id
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:5173/api/room/1
+  body: none
+  auth: none
+}
+
+docs {
+  {
+    "id": 1,
+    "name": "room1",
+    "objects": [
+      {
+        "modelId": 1,
+        "position": [0.1, 0.2, 0.3],
+        "quaternion": [0.1, 0.2, 0.3, 0.4]
+      },
+      {
+        "modelId": 2,
+        "position": [0.1, 0.2, 0.3],
+        "quaternion": [0.1, 0.2, 0.3, 0.4]
+      }
+    ]
+  },
+}

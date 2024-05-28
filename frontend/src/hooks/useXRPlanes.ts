@@ -1,16 +1,23 @@
 import { useThree } from '@react-three/fiber';
 import { useState, useEffect } from 'react';
-import { Group, Matrix4, Mesh, BoxGeometry, MeshBasicMaterial } from 'three';
+import { Matrix4 } from 'three';
+import { v4 } from 'uuid';
+
+export interface PlaneDescriptor {
+  id: string;
+  width: number;
+  height: number;
+  matrix: number[];
+}
 
 export function useXRPlanes() {
   const { xr } = useThree((state) => state.gl);
 
-  const [planesContainer, setPlanesContainer] = useState(new Group());
+  const [planesList, setPlanesList] = useState<PlaneDescriptor[]>([]);
 
   useEffect(() => {
     const matrix = new Matrix4();
-    const currentPlanes = new Map<XRPlane, Mesh>();
-    const container = new Group();
+    const currentPlanes = new Map<XRPlane, PlaneDescriptor>();
 
     let planeschanged = false;
 
@@ -22,12 +29,8 @@ export function useXRPlanes() {
         return;
       }
 
-      for (const [plane, mesh] of currentPlanes) {
+      for (const [plane] of currentPlanes) {
         if (planes.has(plane) === false) {
-          mesh.geometry.dispose();
-          // @ts-expect-error single material
-          mesh.material.dispose();
-          container.remove(mesh);
           currentPlanes.delete(plane);
 
           planeschanged = true;
@@ -66,19 +69,23 @@ export function useXRPlanes() {
           const width = maxX - minX;
           const height = maxZ - minZ;
 
-          const geometry = new BoxGeometry(width, 0.01, height);
-          const material = new MeshBasicMaterial({
-            color: 0xffffff * Math.random(),
-            transparent: true,
-            opacity: 0.5,
+          // const geometry = new BoxGeometry(width, 0.01, height);
+          // const material = new MeshBasicMaterial({
+          //   color: 0xffffff * Math.random(),
+          //   transparent: true,
+          //   opacity: 0.5,
+          // });
+
+          // const mesh = new Mesh(geometry, material);
+          // mesh.position.setFromMatrixPosition(matrix);
+          // mesh.quaternion.setFromRotationMatrix(matrix);
+
+          currentPlanes.set(plane, {
+            id: v4(),
+            width,
+            height,
+            matrix: [...matrix.elements],
           });
-
-          const mesh = new Mesh(geometry, material);
-          mesh.position.setFromMatrixPosition(matrix);
-          mesh.quaternion.setFromRotationMatrix(matrix);
-          container.add(mesh);
-
-          currentPlanes.set(plane, mesh);
 
           planeschanged = true;
         }
@@ -87,7 +94,12 @@ export function useXRPlanes() {
       if (planeschanged) {
         planeschanged = false;
 
-        setPlanesContainer(container.clone());
+        setPlanesList(
+          [...currentPlanes.values()].map((mesh) => ({
+            ...mesh,
+            matrix: [...mesh.matrix],
+          }))
+        );
       }
     }
 
@@ -98,5 +110,5 @@ export function useXRPlanes() {
     };
   }, [xr]);
 
-  return planesContainer;
+  return planesList;
 }

@@ -1,0 +1,18 @@
+meta {
+  name: get models list
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:5173/api/model
+  body: none
+  auth: none
+}
+
+docs {
+  {
+    "id": 1,
+    "url": "/pathToModel.glb"
+  }
+}
