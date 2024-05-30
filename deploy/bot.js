@@ -35,7 +35,7 @@ bot.onText(/\/deploy_frontend/, (msg) => {
 
   bot.sendMessage(chatId, `\`\`\`${command}\`\`\``, params);
 
-  exec(`cd ${dir} && git pull && pnpm run build`, (error, stdout, stderr) => {
+  exec(command, (error, stdout, stderr) => {
     if (error) {
       bot.sendMessage(chatId, `\`\`\`${error.message}\`\`\``, params);
       return;
