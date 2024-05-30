@@ -60,21 +60,7 @@ bot.onText(/\/deploy_frontend/, (msg) => {
 
     bot.sendMessage(
       chatId,
-      `\`\`\`
-
-    ## Build
-
-    -- ${buildCount} --
-
-    ## Output
-
-    ${stdout}
-
-    ## Error
-
-    ${stderr}
-
-    \`\`\``,
+      `## Build \`\`\`\`${buildCount}\`\`\`\` ## Output \`\`\`\`${stdout}\`\`\`\` ## Error \`\`\`\`${stderr}\`\`\`\``,
       params
     );
 
