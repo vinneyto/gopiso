@@ -58,9 +58,25 @@ bot.onText(/\/deploy_frontend/, (msg) => {
     let buildCount = readBuildCount();
     buildCount += 1;
 
-    bot.sendMessage(chatId, `\`\`\`${stdout}\`\`\``, params);
-    bot.sendMessage(chatId, `\`\`\`${stderr}\`\`\``, params);
-    bot.sendMessage(chatId, `\`\`\`Build: ${buildCount}\`\`\``, params);
+    bot.sendMessage(
+      chatId,
+      `\`\`\`
+
+    ## Build
+
+    -- ${buildCount} --
+
+    ## Output
+
+    ${stdout}
+
+    ## Error
+
+    ${stderr}
+
+    \`\`\``,
+      params
+    );
 
     writeBuildCount(buildCount);
   });
