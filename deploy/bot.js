@@ -30,7 +30,7 @@ bot.onText(/\/deploy_frontend/, (msg) => {
   }
 
   const dir = path.join(config.projectPath, 'frontend');
-  const command = `cd ${dir} && git pull && pnpm run build`;
+  const command = `cd ${dir} && git pull && pnpm install && pnpm run build`;
   const params = { parse_mode: 'Markdown' };
 
   bot.sendMessage(chatId, `\`\`\`${command}\`\`\``, params);
