@@ -44,12 +44,12 @@ bot.onText(/\/deploy_frontend/, (msg) => {
   }
 
   const dir = path.join(config.projectPath, 'frontend');
-  const command = `cd ${dir} && git pull && pnpm run build`;
+  const command = `cd ${dir} && git pull && pnpm install && pnpm run build`;
   const params = { parse_mode: 'Markdown' };
 
   bot.sendMessage(chatId, `\`\`\`${command}\`\`\``, params);
 
-  exec(`cd ${dir} && git pull && pnpm run build`, (error, stdout, stderr) => {
+  exec(command, (error, stdout, stderr) => {
     if (error) {
       bot.sendMessage(chatId, `\`\`\`${error.message}\`\`\``, params);
       return;
