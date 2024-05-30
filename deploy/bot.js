@@ -1,9 +1,23 @@
+const fs = require('fs');
 const path = require('path');
 const TelegramBot = require('node-telegram-bot-api');
 const { exec } = require('child_process');
 const config = require('./config');
 
 const bot = new TelegramBot(config.token, { polling: true });
+
+const readBuildCount = () => {
+  try {
+    const data = fs.readFileSync('build_count.txt', 'utf8');
+    return parseInt(data, 10) || 0;
+  } catch (err) {
+    return 0;
+  }
+};
+
+const writeBuildCount = (count) => {
+  fs.writeFileSync('build_count.txt', count.toString(), 'utf8');
+};
 
 const commands = [
   {
@@ -42,6 +56,12 @@ bot.onText(/\/deploy_frontend/, (msg) => {
     }
     bot.sendMessage(chatId, `\`\`\`${stdout}\`\`\``, params);
     bot.sendMessage(chatId, `\`\`\`${stderr}\`\`\``, params);
+
+    let buildCount = readBuildCount();
+    buildCount += 1;
+    writeBuildCount(buildCount);
+
+    bot.sendMessage(chatId, `\`\`\`Build: ${buildCount}\`\`\``, params);
   });
 });
 
