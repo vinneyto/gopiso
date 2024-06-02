@@ -8,6 +8,7 @@ export interface PlaneDescriptor {
   width: number;
   height: number;
   matrix: number[];
+  orientation: 'horizontal' | 'vertical';
 }
 
 export function useXRPlanes() {
@@ -85,6 +86,7 @@ export function useXRPlanes() {
             width,
             height,
             matrix: [...matrix.elements],
+            orientation: plane.orientation,
           });
 
           planeschanged = true;
