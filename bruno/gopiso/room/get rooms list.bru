@@ -5,9 +5,13 @@ meta {
 }
 
 get {
-  url: http://localhost:5173/api/room
+  url: http://{{server}}/api/v1/rooms
   body: none
   auth: none
+}
+
+assert {
+  res.status: eq 200
 }
 
 docs {
