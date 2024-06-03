@@ -1,1 +1,1 @@
-export * from './RoomSpace';
+export * from './RoomPlanes';
