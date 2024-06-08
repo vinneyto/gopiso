@@ -23,11 +23,11 @@ func setupRoutes(app *app) *echo.Echo {
 	v1 := e.Group("/api/v1")
 	{
 		g := v1.Group("/models")
-		g.GET("", handler.ListModels())
+		g.GET("", handler.ListModels(app.Repository))
 	}
 	{
 		g := v1.Group("/rooms")
-		g.GET("", handler.ListRooms())
+		g.GET("", handler.ListRooms(app.Repository))
 		g.GET("/:id", handler.GetRoom())
 		g.POST("/:id", handler.CreateRoom())
 		g.PATCH("/:id", handler.UpdateRoom())

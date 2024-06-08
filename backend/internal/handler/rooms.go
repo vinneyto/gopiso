@@ -1,12 +1,19 @@
 package handler
 
-import "github.com/labstack/echo/v4"
+import (
+	"net/http"
 
-func ListRooms() echo.HandlerFunc {
+	"github.com/labstack/echo/v4"
+	"github.com/vinneyto/gopiso/backend/internal/db"
+)
 
+func ListRooms(db db.Repository) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		f := Unimplemented()
-		return f(c)
+		rooms, err := db.ListRooms()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err)
+		}
+		return c.JSON(http.StatusOK, rooms)
 	}
 }
 

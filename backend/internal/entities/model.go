@@ -1,5 +1,10 @@
 package entities
 
+type Model struct {
+	ID  int    `json:"id"`
+	Url string `json:"url"`
+}
+
 type Object struct {
 	ID         int       `json:"modelId"`
 	Position   []int     `json:"position"`
