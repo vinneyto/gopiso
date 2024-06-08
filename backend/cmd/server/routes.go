@@ -31,7 +31,7 @@ func setupRoutes(app *app) *echo.Echo {
 		g.GET("/:id", handler.GetRoom())
 		g.POST("/:id", handler.CreateRoom())
 		g.PATCH("/:id", handler.UpdateRoom())
-		g.DELETE("/:id", handler.DeleteRoom())
+		g.DELETE("/:id", handler.DeleteRoom(app.Repository))
 	}
 
 	return e
