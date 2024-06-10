@@ -8,42 +8,41 @@ import (
 
 type DataStore[T any] struct {
 	mu   sync.Mutex
-	data map[int]T
+	data map[int64]*T
 }
 
 func NewDataStore[T any]() *DataStore[T] {
 	return &DataStore[T]{
-		data: make(map[int]T),
+		data: make(map[int64]*T),
 	}
 }
 
-func (ds *DataStore[T]) Set(key int, value T) {
+func (ds *DataStore[T]) Set(key int64, value *T) {
 	ds.mu.Lock()
 	defer ds.mu.Unlock()
 
 	ds.data[key] = value
 }
 
-func (ds *DataStore[T]) Get(key int) (T, bool) {
+func (ds *DataStore[T]) Get(key int64) *T {
 	ds.mu.Lock()
 	defer ds.mu.Unlock()
 
-	v, ok := ds.data[key]
-	return v, ok
+	return ds.data[key]
 }
 
-func (ds *DataStore[T]) Delete(key int) {
+func (ds *DataStore[T]) Delete(key int64) {
 	ds.mu.Lock()
 	defer ds.mu.Unlock()
 
 	delete(ds.data, key)
 }
 
-func (ds *DataStore[T]) List() []T {
+func (ds *DataStore[T]) List() []*T {
 	ds.mu.Lock()
 	defer ds.mu.Unlock()
 
-	values := make([]T, 0, len(ds.data))
+	values := make([]*T, 0, len(ds.data))
 	for _, value := range ds.data {
 		values = append(values, value)
 	}
@@ -69,37 +68,32 @@ func NewTemporary() *Temporary {
 	}
 }
 
-func (t *Temporary) ListModels() ([]entities.Model, error) {
-	return t.Models.List(), nil
+func (t *Temporary) ListModels() []*entities.Model {
+	return t.Models.List()
 }
 
-func (t *Temporary) ListRooms() ([]entities.Room, error) {
-	return t.Rooms.List(), nil
+func (t *Temporary) ListRooms() []*entities.Room {
+	return t.Rooms.List()
 }
 
-func (t *Temporary) GetRoom(id int) (entities.Room, error) {
-	room, ok := t.Rooms.Get(id)
-	if !ok {
-		return entities.Room{}, &NotFoundError{}
-	}
-	return room, nil
+func (t *Temporary) GetRoom(id int64) *entities.Room {
+	return t.Rooms.Get(id)
 }
 
-func (t *Temporary) CreateRoom(room entities.Room) (entities.Room, error) {
+func (t *Temporary) CreateRoom(room *entities.Room) *entities.Room {
 	t.Rooms.Set(room.ID, room)
-	return room, nil
+	return t.GetRoom(room.ID)
 }
 
-func (t *Temporary) UpdateRoom(id int, room entities.Room) (entities.Room, error) {
-	_, ok := t.Rooms.Get(id)
-	if !ok {
-		return entities.Room{}, &NotFoundError{}
+func (t *Temporary) UpdateRoom(id int64, room *entities.Room) *entities.Room {
+	if t.Rooms.Get(id) == nil {
+		return nil
 	}
 	t.Rooms.Set(id, room)
-	return room, nil
+	return room
 }
 
-func (t *Temporary) DeleteRoom(id int) error {
+func (t *Temporary) DeleteRoom(id int64) error {
 	t.Rooms.Delete(id)
 	return nil
 }

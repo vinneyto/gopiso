@@ -6,20 +6,20 @@ import (
 )
 
 type app struct {
-	Repository db.Repository
+	Repository *db.Temporary
 }
 
 func newApp() (*app, error) {
 
 	Repository := db.NewTemporary()
 
-	Repository.CreateRoom(entities.Room{
+	Repository.CreateRoom(&entities.Room{
 		ID:      1,
 		Name:    "Room 1",
 		Objects: []entities.Object{},
 	})
 
-	Repository.CreateRoom(entities.Room{
+	Repository.CreateRoom(&entities.Room{
 		ID:      2,
 		Name:    "Room 2",
 		Objects: []entities.Object{},

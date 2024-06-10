@@ -28,9 +28,9 @@ func setupRoutes(app *app) *echo.Echo {
 	{
 		g := v1.Group("/rooms")
 		g.GET("", handler.ListRooms(app.Repository))
-		g.GET("/:id", handler.GetRoom())
-		g.POST("/:id", handler.CreateRoom())
-		g.PATCH("/:id", handler.UpdateRoom())
+		g.GET("/:id", handler.GetRoom(app.Repository))
+		g.POST("/:id", handler.CreateRoom(app.Repository))
+		g.PATCH("/:id", handler.UpdateRoom(app.Repository))
 		g.DELETE("/:id", handler.DeleteRoom(app.Repository))
 	}
 
