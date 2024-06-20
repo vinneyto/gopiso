@@ -24,6 +24,7 @@ func setupRoutes(app *app) *echo.Echo {
 	{
 		g := v1.Group("/models")
 		g.GET("", handler.ListModels(app.Repository))
+		g.POST("", handler.CreateModel(app.Repository))
 	}
 	{
 		g := v1.Group("/rooms")

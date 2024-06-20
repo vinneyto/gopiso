@@ -23,3 +23,27 @@ func ListModels(lister ModelLister) echo.HandlerFunc {
 		return c.JSON(http.StatusOK, models)
 	}
 }
+
+type ModelCreator interface {
+	CreateModel(model *entities.Model) *entities.Model
+}
+
+func CreateModel(creator ModelCreator) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var model entities.Model
+
+		err := c.Bind(&model)
+
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		newModel := creator.CreateModel(&model)
+
+		if newModel == nil {
+			return c.JSON(http.StatusInternalServerError, "failed to create model")
+		}
+
+		return c.JSON(http.StatusOK, newModel)
+	}
+}

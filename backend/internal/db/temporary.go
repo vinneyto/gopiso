@@ -7,14 +7,23 @@ import (
 )
 
 type DataStore[T any] struct {
-	mu   sync.Mutex
-	data map[int64]*T
+	mu    sync.Mutex
+	data  map[int64]*T
+	index int64
 }
 
 func NewDataStore[T any]() *DataStore[T] {
 	return &DataStore[T]{
 		data: make(map[int64]*T),
 	}
+}
+
+func (ds *DataStore[T]) NextID() int64 {
+	ds.mu.Lock()
+	defer ds.mu.Unlock()
+
+	ds.index++
+	return ds.index
 }
 
 func (ds *DataStore[T]) Set(key int64, value *T) {
@@ -68,6 +77,16 @@ func NewTemporary() *Temporary {
 	}
 }
 
+func (t *Temporary) CreateModel(model *entities.Model) *entities.Model {
+	t.Models.Set(t.Models.NextID(), model)
+	model.ID = t.Models.index
+	return t.GetModel(model.ID)
+}
+
+func (t *Temporary) GetModel(id int64) *entities.Model {
+	return t.Models.Get(id)
+}
+
 func (t *Temporary) ListModels() []*entities.Model {
 	return t.Models.List()
 }
@@ -81,7 +100,8 @@ func (t *Temporary) GetRoom(id int64) *entities.Room {
 }
 
 func (t *Temporary) CreateRoom(room *entities.Room) *entities.Room {
-	t.Rooms.Set(room.ID, room)
+	t.Rooms.Set(t.Rooms.NextID(), room)
+	room.ID = t.Rooms.index
 	return t.GetRoom(room.ID)
 }
 
