@@ -1,0 +1,7 @@
+### REST Client
+
+GET http://localhost:5173/api/v1/rooms
+
+###
+
+DELETE http://localhost:5173/api/v1/rooms/1
