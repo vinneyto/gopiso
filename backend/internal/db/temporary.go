@@ -66,54 +66,64 @@ func (e *NotFoundError) Error() string {
 }
 
 type Temporary struct {
-	Models DataStore[entities.Model]
-	Rooms  DataStore[entities.Room]
+	models  DataStore[entities.Model]
+	rooms   DataStore[entities.Room]
+	objects DataStore[entities.Object]
 }
 
 func NewTemporary() *Temporary {
 	return &Temporary{
-		Models: *NewDataStore[entities.Model](),
-		Rooms:  *NewDataStore[entities.Room](),
+		models:  *NewDataStore[entities.Model](),
+		rooms:   *NewDataStore[entities.Room](),
+		objects: *NewDataStore[entities.Object](),
 	}
 }
 
 func (t *Temporary) CreateModel(model *entities.Model) *entities.Model {
-	t.Models.Set(t.Models.NextID(), model)
-	model.ID = t.Models.index
+	t.models.Set(t.models.NextID(), model)
+	model.ID = t.models.index
 	return t.GetModel(model.ID)
 }
 
 func (t *Temporary) GetModel(id int64) *entities.Model {
-	return t.Models.Get(id)
+	return t.models.Get(id)
 }
 
 func (t *Temporary) ListModels() []*entities.Model {
-	return t.Models.List()
+	return t.models.List()
 }
 
 func (t *Temporary) ListRooms() []*entities.Room {
-	return t.Rooms.List()
+	return t.rooms.List()
 }
 
 func (t *Temporary) GetRoom(id int64) *entities.Room {
-	return t.Rooms.Get(id)
+	return t.rooms.Get(id)
 }
 
 func (t *Temporary) CreateRoom(room *entities.Room) *entities.Room {
-	t.Rooms.Set(t.Rooms.NextID(), room)
-	room.ID = t.Rooms.index
+	t.rooms.Set(t.rooms.NextID(), room)
+	room.ID = t.rooms.index
+
+	for _, object := range room.Objects {
+		if object.ID == 0 {
+			t.objects.Set(t.objects.NextID(), &object)
+			object.ID = t.objects.index
+		}
+	}
+
 	return t.GetRoom(room.ID)
 }
 
 func (t *Temporary) UpdateRoom(id int64, room *entities.Room) *entities.Room {
-	if t.Rooms.Get(id) == nil {
+	if t.rooms.Get(id) == nil {
 		return nil
 	}
-	t.Rooms.Set(id, room)
+	t.rooms.Set(id, room)
 	return room
 }
 
 func (t *Temporary) DeleteRoom(id int64) error {
-	t.Rooms.Delete(id)
+	t.rooms.Delete(id)
 	return nil
 }
