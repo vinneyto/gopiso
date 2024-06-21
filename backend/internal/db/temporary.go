@@ -107,7 +107,7 @@ func (t *Temporary) CreateRoom(room *entities.Room) *entities.Room {
 
 	for _, object := range room.Objects {
 		if object.ID == 0 {
-			t.objects.Set(t.objects.NextID(), &object)
+			t.objects.Set(t.objects.NextID(), object)
 			object.ID = t.objects.index
 		}
 	}
@@ -115,15 +115,15 @@ func (t *Temporary) CreateRoom(room *entities.Room) *entities.Room {
 	return t.GetRoom(room.ID)
 }
 
-func (t *Temporary) UpdateRoom(id int64, room *entities.Room) *entities.Room {
-	if t.rooms.Get(id) == nil {
+func (t *Temporary) UpdateRoom(room *entities.Room) *entities.Room {
+	if t.rooms.Get(room.ID) == nil {
 		return nil
 	}
-	t.rooms.Set(id, room)
+	t.rooms.Set(room.ID, room)
 	return room
 }
 
-func (t *Temporary) DeleteRoom(id int64) error {
+func (t *Temporary) DeleteRoom(id int64) bool {
 	t.rooms.Delete(id)
-	return nil
+	return true
 }
