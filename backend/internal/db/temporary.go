@@ -7,14 +7,23 @@ import (
 )
 
 type DataStore[T any] struct {
-	mu   sync.Mutex
-	data map[int64]*T
+	mu    sync.Mutex
+	data  map[int64]*T
+	index int64
 }
 
 func NewDataStore[T any]() *DataStore[T] {
 	return &DataStore[T]{
 		data: make(map[int64]*T),
 	}
+}
+
+func (ds *DataStore[T]) NextID() int64 {
+	ds.mu.Lock()
+	defer ds.mu.Unlock()
+
+	ds.index++
+	return ds.index
 }
 
 func (ds *DataStore[T]) Set(key int64, value *T) {
@@ -57,43 +66,64 @@ func (e *NotFoundError) Error() string {
 }
 
 type Temporary struct {
-	Models DataStore[entities.Model]
-	Rooms  DataStore[entities.Room]
+	models  DataStore[entities.Model]
+	rooms   DataStore[entities.Room]
+	objects DataStore[entities.Object]
 }
 
 func NewTemporary() *Temporary {
 	return &Temporary{
-		Models: *NewDataStore[entities.Model](),
-		Rooms:  *NewDataStore[entities.Room](),
+		models:  *NewDataStore[entities.Model](),
+		rooms:   *NewDataStore[entities.Room](),
+		objects: *NewDataStore[entities.Object](),
 	}
+}
+
+func (t *Temporary) CreateModel(model *entities.Model) *entities.Model {
+	t.models.Set(t.models.NextID(), model)
+	model.ID = t.models.index
+	return t.GetModel(model.ID)
+}
+
+func (t *Temporary) GetModel(id int64) *entities.Model {
+	return t.models.Get(id)
 }
 
 func (t *Temporary) ListModels() []*entities.Model {
-	return t.Models.List()
+	return t.models.List()
 }
 
 func (t *Temporary) ListRooms() []*entities.Room {
-	return t.Rooms.List()
+	return t.rooms.List()
 }
 
 func (t *Temporary) GetRoom(id int64) *entities.Room {
-	return t.Rooms.Get(id)
+	return t.rooms.Get(id)
 }
 
 func (t *Temporary) CreateRoom(room *entities.Room) *entities.Room {
-	t.Rooms.Set(room.ID, room)
+	t.rooms.Set(t.rooms.NextID(), room)
+	room.ID = t.rooms.index
+
+	for _, object := range room.Objects {
+		if object.ID == 0 {
+			t.objects.Set(t.objects.NextID(), object)
+			object.ID = t.objects.index
+		}
+	}
+
 	return t.GetRoom(room.ID)
 }
 
-func (t *Temporary) UpdateRoom(id int64, room *entities.Room) *entities.Room {
-	if t.Rooms.Get(id) == nil {
+func (t *Temporary) UpdateRoom(room *entities.Room) *entities.Room {
+	if t.rooms.Get(room.ID) == nil {
 		return nil
 	}
-	t.Rooms.Set(id, room)
+	t.rooms.Set(room.ID, room)
 	return room
 }
 
-func (t *Temporary) DeleteRoom(id int64) error {
-	t.Rooms.Delete(id)
-	return nil
+func (t *Temporary) DeleteRoom(id int64) bool {
+	t.rooms.Delete(id)
+	return true
 }

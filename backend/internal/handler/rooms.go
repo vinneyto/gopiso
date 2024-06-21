@@ -74,15 +74,15 @@ func CreateRoom(creator RoomCreator) echo.HandlerFunc {
 }
 
 type RoomUpdater interface {
-	UpdateRoom(id int64, room *entities.Room) *entities.Room
+	UpdateRoom(room *entities.Room) *entities.Room
 }
 
 func UpdateRoom(updater RoomUpdater) echo.HandlerFunc {
 	// do we need some RoomUpdateDto which would be a subset of Room?
 	type request struct {
-		ID      int64             `param:"id"`
-		Name    string            `json:"name"`
-		Objects []entities.Object `json:"objects"`
+		ID      int64              `param:"id"`
+		Name    string             `json:"name"`
+		Objects []*entities.Object `json:"objects"`
 	}
 
 	return func(c echo.Context) error {
@@ -100,7 +100,7 @@ func UpdateRoom(updater RoomUpdater) echo.HandlerFunc {
 			Objects: req.Objects,
 		}
 
-		updatedRoom := updater.UpdateRoom(req.ID, room)
+		updatedRoom := updater.UpdateRoom(room)
 
 		if updatedRoom == nil {
 			return c.JSON(http.StatusInternalServerError, nil)
@@ -111,7 +111,7 @@ func UpdateRoom(updater RoomUpdater) echo.HandlerFunc {
 }
 
 type RoomDeleter interface {
-	DeleteRoom(id int64) error
+	DeleteRoom(id int64) bool
 }
 
 func DeleteRoom(deleter RoomDeleter) echo.HandlerFunc {
@@ -128,10 +128,8 @@ func DeleteRoom(deleter RoomDeleter) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 
-		err = deleter.DeleteRoom(req.ID)
-
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+		if !deleter.DeleteRoom(req.ID) {
+			return c.JSON(http.StatusInternalServerError, nil)
 		}
 
 		return c.JSON(http.StatusOK, nil)
